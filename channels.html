@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/assets/favicon.ico?v=2" type="image/x-icon">
+  <title>YouTube - Channels</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #fff;
+      color: #333;
+      font: 13px Arial, sans-serif;
+      margin: 0;
+    }
+
+    .header {
+      width: 960px;
+      max-width: 96%;
+      margin: auto;
+      padding: 15px 0;
+    }
+
+    .header img {
+      width: 125px;
+    }
+
+    .nav {
+      background: #eee;
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .nav-inner {
+      width: 960px;
+      max-width: 96%;
+      margin: auto;
+      padding: 9px 0;
+    }
+
+    .nav a {
+      color: #034b8a;
+      margin-right: 20px;
+      text-decoration: none;
+    }
+
+    .content {
+      width: 960px;
+      max-width: 96%;
+      margin: 25px auto;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: normal;
+      margin-bottom: 20px;
+    }
+
+    .channels {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .channel {
+      min-width: 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 12px;
+    }
+
+    .channel img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      background: #eee;
+      border: 1px solid #ddd;
+    }
+
+    .channel a {
+      display: block;
+      color: #034b8a;
+      font-weight: bold;
+      text-decoration: none;
+      margin-top: 7px;
+    }
+
+    .channel a:hover {
+      text-decoration: underline;
+    }
+
+    .channel p {
+      color: #777;
+      margin: 5px 0;
+      line-height: 1.4;
+    }
+
+    #status {
+      color: #777;
+      padding: 15px 0;
+    }
+
+    @media (max-width: 650px) {
+      .channels {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 380px) {
+      .channels {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="header">
+    <a href="index.html">
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/0/05/Logo_of_YouTube_%282006-2011%29.svg"
+        alt="YouTube">
+    </a>
+  </header>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html">Home</a>
+      <a href="videos.html">Videos</a>
+      <a href="channels.html">Channels</a>
+      <a href="categories.html">Categories</a>
+      <a href="community.html">Community</a>
+    </div>
+  </nav>
+
+  <main class="content">
+
+    <h1>Channels</h1>
+
+    <div id="status">Loading channels...</div>
+
+    <div class="channels" id="channels"></div>
+
+  </main>
+
+  <script>
+    const API = "/api";
+
+    async function loadChannels() {
+      const status = document.getElementById("status");
+      const container = document.getElementById("channels");
+
+      try {
+        const response = await fetch(`${API}/channels`);
+
+        if (!response.ok) {
+          throw new Error("Could not load channels");
+        }
+
+        const data = await response.json();
+        const channels = data.items || [];
+
+        container.replaceChildren();
+
+        if (channels.length === 0) {
+          status.textContent = "No channels found.";
+          return;
+        }
+
+        status.textContent = "";
+
+        channels.forEach(channel => {
+          const id = channel.id?.channelId || channel.id;
+          const snippet = channel.snippet || {};
+
+          if (!id) return;
+
+          const card = document.createElement("div");
+          card.className = "channel";
+
+          const image = document.createElement("img");
+
+          image.src =
+            snippet.thumbnails?.high?.url ||
+            snippet.thumbnails?.medium?.url ||
+            snippet.thumbnails?.default?.url ||
+            "";
+
+          image.alt = snippet.title || "Channel";
+
+          const link = document.createElement("a");
+
+          link.href = `channel.html?id=${encodeURIComponent(id)}`;
+          link.textContent = snippet.title || "Unknown channel";
+
+          const description = document.createElement("p");
+
+          description.textContent =
+            snippet.description || "";
+
+          card.append(image, link, description);
+          container.appendChild(card);
+        });
+
+        if (!container.children.length) {
+          status.textContent = "No valid channels found.";
+        }
+
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Could not load channels.";
+      }
+    }
+
+    loadChannels();
+  </script>
+
+</body>
+</html>

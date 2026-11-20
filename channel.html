@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<link rel="icon" href="/assets/favicon.ico?v=2" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YouTube - Channel</title>
+  <style>
+    body { background:#fff; color:#333; font:13px Arial,sans-serif; margin:0; }
+    .header { width:960px; margin:auto; padding:15px 0; }
+    .header img { width:125px; }
+    .nav { background:#eee; border-top:1px solid #ccc; border-bottom:1px solid #ccc; }
+    .nav-inner { width:960px; margin:auto; padding:9px 0; }
+    .nav a { color:#034b8a; margin-right:20px; text-decoration:none; }
+    .content { width:960px; margin:25px auto; }
+    .profile { background:#f4f4f4; border:1px solid #ccc; padding:18px; display:flex; gap:18px; }
+    .avatar { width:100px; height:100px; object-fit:cover; background:#ddd; }
+    h1 { font-size:22px; margin:5px 0 10px; }
+    .description { color:#555; line-height:1.5; }
+    h2 { font-size:18px; border-bottom:1px solid #ccc; padding-bottom:8px; margin-top:25px; }
+    .videos { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; }
+    .video { min-width:0; }
+    .video img { width:100%; aspect-ratio:4/3; object-fit:cover; background:#eee; }
+    .video a { color:#034b8a; text-decoration:none; font-weight:bold; }
+    .video p { color:#777; margin:5px 0; }
+    #status { color:#777; padding:15px 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <a href="index.html">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Logo_of_YouTube_%282006-2011%29.svg" alt="YouTube">
+    </a>
+  </div>
+
+  <div class="nav">
+    <div class="nav-inner">
+      <a href="index.html">Home</a>
+      <a href="videos.html">Videos</a>
+      <a href="channels.html">Channels</a>
+      <a href="categories.html">Categories</a>
+    </div>
+  </div>
+
+  <main class="content">
+    <div id="status">Loading channel...</div>
+
+    <section class="profile" id="profile" hidden>
+      <img class="avatar" id="avatar" alt="">
+      <div>
+        <h1 id="name"></h1>
+        <div class="description" id="description"></div>
+        <p id="subscribers"></p>
+      </div>
+    </section>
+
+    <h2>Videos</h2>
+    <div class="videos" id="videos"></div>
+  </main>
+
+  <script>
+    const API = "/api";
+    const params = new URLSearchParams(location.search);
+    const channelId = params.get("id");
+
+    async function loadChannel() {
+      const status = document.getElementById("status");
+
+      if (!channelId) {
+        status.textContent = "Channel ID is missing.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API}/channel/${encodeURIComponent(channelId)}`
+        );
+
+        if (!response.ok) throw new Error("Channel not found");
+
+        const data = await response.json();
+        const channel = data.items?.[0] || data;
+
+        if (!channel.snippet) throw new Error("Invalid channel response");
+
+        const snippet = channel.snippet;
+        document.title = `YouTube - ${snippet.title || "Channel"}`;
+
+        document.getElementById("name").textContent = snippet.title || "Unknown channel";
+        document.getElementById("description").textContent =
+          snippet.description || "No description available.";
+
+        const avatar = document.getElementById("avatar");
+        avatar.src = snippet.thumbnails?.high?.url ||
+                     snippet.thumbnails?.medium?.url ||
+                     snippet.thumbnails?.default?.url || "";
+        avatar.onerror = () => avatar.style.display = "none";
+
+        const count = channel.statistics?.subscriberCount;
+        document.getElementById("subscribers").textContent =
+          count ? `${Number(count).toLocaleString()} subscribers` : "";
+
+        document.getElementById("profile").hidden = false;
+        status.textContent = "";
+
+        await loadVideos();
+      } catch (error) {
+        status.textContent = "Could not load this channel.";
+        console.error(error);
+      }
+    }
+
+    async function loadVideos() {
+      const container = document.getElementById("videos");
+
+      try {
+        const response = await fetch(
+          `${API}/videos?channelId=${encodeURIComponent(channelId)}`
+        );
+
+        if (!response.ok) throw new Error("Could not load videos");
+
+        const data = await response.json();
+        const videos = data.items || [];
+
+        videos.forEach(video => {
+          const id = video.id?.videoId || video.id;
+          const snippet = video.snippet || video;
+          if (!id) return;
+
+          const card = document.createElement("div");
+          card.className = "video";
+
+          const img = document.createElement("img");
+          img.src = snippet.thumbnails?.medium?.url || "";
+          img.alt = "";
+
+          const link = document.createElement("a");
+          link.href = `watch.html?v=${encodeURIComponent(id)}`;
+          link.textContent = snippet.title || "Untitled video";
+
+          const date = document.createElement("p");
+          date.textContent = snippet.publishedAt
+            ? new Date(snippet.publishedAt).toLocaleDateString()
+            : "";
+
+          card.append(img, link, date);
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error(error);
+        container.textContent = "Could not load channel videos.";
+      }
+    }
+
+    loadChannel();
+  </script>
+</body>
+</html>

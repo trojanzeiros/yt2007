@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" href="/assets/favicon.ico?v=2" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube - Videos</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+}
+
+a {
+  color: #0033cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.header {
+  width: 960px;
+  margin: auto;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  width: 130px;
+}
+
+.search {
+  display: flex;
+  gap: 5px;
+}
+
+.search input {
+  width: 300px;
+  height: 28px;
+  border: 1px solid #999;
+  padding: 5px;
+}
+
+.search button {
+  background: linear-gradient(#fff, #ddd);
+  border: 1px solid #999;
+  padding: 5px 15px;
+  cursor: pointer;
+}
+
+.nav {
+  background: linear-gradient(#f5f5f5, #ddd);
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #bbb;
+}
+
+.nav-inner {
+  width: 960px;
+  margin: auto;
+  display: flex;
+  gap: 25px;
+  padding: 10px 0;
+}
+
+.nav a {
+  color: #333;
+  font-weight: bold;
+}
+
+.container {
+  width: 960px;
+  margin: 25px auto;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: normal;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 12px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 15px 0;
+  color: #666;
+}
+
+.toolbar select {
+  padding: 4px;
+  border: 1px solid #aaa;
+}
+
+.video-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px 15px;
+}
+
+.video {
+  min-width: 0;
+}
+
+.thumbnail {
+  display: block;
+  position: relative;
+  background: #eee;
+  border: 1px solid #ccc;
+  height: 112px;
+  overflow: hidden;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.duration {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  background: rgba(0,0,0,.8);
+  color: white;
+  padding: 2px 4px;
+  font-size: 10px;
+}
+
+.video-title {
+  display: block;
+  font-weight: bold;
+  margin-top: 7px;
+  line-height: 1.35;
+}
+
+.video-info {
+  color: #777;
+  font-size: 11px;
+  margin-top: 5px;
+  line-height: 1.5;
+}
+
+.video-channel {
+  color: #0033cc;
+}
+
+#status {
+  padding: 25px;
+  color: #777;
+  text-align: center;
+}
+
+.footer {
+  width: 960px;
+  margin: 40px auto;
+  padding: 15px 0;
+  border-top: 1px solid #ccc;
+  color: #888;
+  font-size: 11px;
+}
+
+@media(max-width: 980px) {
+  .header, .nav-inner, .container, .footer {
+    width: 94%;
+  }
+
+  .video-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media(max-width: 600px) {
+  .video-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 15px 0;
+    gap: 10px;
+  }
+
+  .search input {
+    width: 180px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+  <a href="index.html">
+    <img class="logo"
+      src="https://upload.wikimedia.org/wikipedia/commons/0/05/Logo_of_YouTube_%282006-2011%29.svg"
+      alt="YouTube">
+  </a>
+
+  <form class="search" id="searchForm">
+    <input id="searchInput" type="search" placeholder="Search videos...">
+    <button type="submit">Search</button>
+  </form>
+</header>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <a href="videos.html">Videos</a>
+    <a href="channels.html">Channels</a>
+    <a href="categories.html">Categories</a>
+    <a href="community.html">Community</a>
+  </div>
+</nav>
+
+<main class="container">
+
+  <h1 class="page-title" id="pageTitle">Videos</h1>
+
+  <div class="toolbar">
+    <span id="resultCount">Browse videos</span>
+
+    <select id="sortSelect">
+      <option value="relevance">Relevance</option>
+      <option value="date">Recently added</option>
+      <option value="viewCount">Most viewed</option>
+      <option value="rating">Top rated</option>
+    </select>
+  </div>
+
+  <div id="status">Loading videos...</div>
+
+  <section class="video-list" id="videoList"></section>
+
+</main>
+
+<footer class="footer">
+  About Us &nbsp; Help &nbsp; Terms &nbsp; Privacy Policy
+  <br><br>
+  © YouTube, LLC
+</footer>
+
+<script>
+const API = "/api";
+
+const videoList = document.getElementById("videoList");
+const status = document.getElementById("status");
+const searchInput = document.getElementById("searchInput");
+const pageTitle = document.getElementById("pageTitle");
+const resultCount = document.getElementById("resultCount");
+const sortSelect = document.getElementById("sortSelect");
+
+let currentQuery = "";
+
+function getVideoId(video) {
+  return typeof video.id === "string"
+    ? video.id
+    : video.id?.videoId;
+}
+
+function createVideo(video) {
+  const id = getVideoId(video);
+  const snippet = video.snippet || {};
+
+  if (!id) return null;
+
+  const card = document.createElement("article");
+  card.className = "video";
+
+  const thumbnailLink = document.createElement("a");
+  thumbnailLink.className = "thumbnail";
+  thumbnailLink.href = `watch.html?v=${encodeURIComponent(id)}`;
+
+  const image = document.createElement("img");
+  image.src =
+    snippet.thumbnails?.medium?.url ||
+    snippet.thumbnails?.default?.url ||
+    "";
+  image.alt = snippet.title || "Video thumbnail";
+  image.loading = "lazy";
+
+  thumbnailLink.appendChild(image);
+
+  const title = document.createElement("a");
+  title.className = "video-title";
+  title.href = `watch.html?v=${encodeURIComponent(id)}`;
+  title.textContent = snippet.title || "Untitled video";
+
+  const info = document.createElement("div");
+  info.className = "video-info";
+
+  const channel = document.createElement("a");
+  channel.className = "video-channel";
+  channel.href = snippet.channelId
+    ? `channel.html?id=${encodeURIComponent(snippet.channelId)}`
+    : "#";
+  channel.textContent = snippet.channelTitle || "Unknown channel";
+
+  const date = snippet.publishedAt
+    ? new Date(snippet.publishedAt).toLocaleDateString()
+    : "";
+
+  info.append(
+    channel,
+    document.createElement("br"),
+    document.createTextNode(date)
+  );
+
+  card.append(thumbnailLink, title, info);
+
+  return card;
+}
+
+async function loadVideos(query = "") {
+  currentQuery = query;
+  videoList.replaceChildren();
+
+  status.textContent = "Loading videos...";
+  pageTitle.textContent = query ? `Search results for "${query}"` : "Videos";
+
+  const params = new URLSearchParams();
+
+  if (query) params.set("q", query);
+
+  try {
+    const response = await fetch(`${API}/videos?${params}`);
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "API request failed");
+    }
+
+    const videos = data.items || [];
+
+    status.textContent = "";
+
+    if (!videos.length) {
+      status.textContent = "No videos found.";
+      return;
+    }
+
+    resultCount.textContent = `${videos.length} videos found`;
+
+    videos.forEach(video => {
+      const card = createVideo(video);
+      if (card) videoList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Could not load videos. Check your server and API key.";
+  }
+}
+
+document.getElementById("searchForm").addEventListener("submit", event => {
+  event.preventDefault();
+  loadVideos(searchInput.value.trim());
+});
+
+sortSelect.addEventListener("change", async () => {
+  const query = currentQuery;
+  videoList.replaceChildren();
+  status.textContent = "Loading videos...";
+
+  const params = new URLSearchParams({
+    q: query,
+    order: sortSelect.value
+  });
+
+  try {
+    const response = await fetch(`${API}/videos?${params}`);
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || "Request failed");
+
+    status.textContent = "";
+
+    const videos = data.items || [];
+    resultCount.textContent = `${videos.length} videos found`;
+
+    if (!videos.length) {
+      status.textContent = "No videos found.";
+      return;
+    }
+
+    videos.forEach(video => {
+      const card = createVideo(video);
+      if (card) videoList.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error(error);
+    status.textContent = "Could not sort videos.";
+  }
+});
+
+loadVideos();
+</script>
+
+</body>
+</html>

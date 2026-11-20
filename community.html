@@ -1,0 +1,528 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/assets/favicon.ico?v=2" type="image/x-icon">
+  <title>YouTube - Community</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: white;
+      color: #333;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 13px;
+    }
+
+    .header {
+      width: 960px;
+      max-width: 96%;
+      height: 75px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      width: 130px;
+    }
+
+    .search {
+      display: flex;
+      gap: 5px;
+    }
+
+    .search input {
+      width: 300px;
+      height: 27px;
+      border: 1px solid #999;
+      padding: 4px;
+    }
+
+    .search button {
+      border: 1px solid #999;
+      background: linear-gradient(#fff, #ddd);
+      padding: 4px 14px;
+      cursor: pointer;
+    }
+
+    .nav {
+      background: linear-gradient(#f5f5f5, #ddd);
+      border-top: 1px solid #ccc;
+      border-bottom: 1px solid #bbb;
+    }
+
+    .nav-inner {
+      width: 960px;
+      max-width: 96%;
+      margin: auto;
+      padding: 10px 0;
+      display: flex;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      color: #333;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .container {
+      width: 960px;
+      max-width: 96%;
+      margin: 25px auto;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: normal;
+      margin: 0 0 18px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+
+    .community-layout {
+      display: grid;
+      grid-template-columns: 650px 1fr;
+      gap: 25px;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: normal;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+      margin: 0 0 15px;
+    }
+
+    .post-box {
+      border: 1px solid #ccc;
+      background: #f5f5f5;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .post-box textarea {
+      width: 100%;
+      height: 75px;
+      resize: vertical;
+      border: 1px solid #aaa;
+      padding: 8px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+    }
+
+    .post-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .post-actions button {
+      border: 1px solid #999;
+      background: linear-gradient(#fff, #ddd);
+      padding: 5px 15px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .post-actions button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .post {
+      border-bottom: 1px solid #ddd;
+      padding: 14px 0;
+      display: flex;
+      gap: 12px;
+    }
+
+    .post-avatar {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+      background: #ddd;
+      border: 1px solid #ccc;
+      object-fit: cover;
+    }
+
+    .post-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .post-author {
+      color: #034b8a;
+      font-weight: bold;
+    }
+
+    .post-date {
+      color: #999;
+      font-size: 11px;
+      margin-left: 7px;
+    }
+
+    .post-text {
+      line-height: 1.5;
+      margin: 7px 0;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .post-footer {
+      color: #777;
+      font-size: 11px;
+    }
+
+    .sidebar-box {
+      border: 1px solid #ccc;
+      margin-bottom: 18px;
+    }
+
+    .sidebar-title {
+      background: linear-gradient(#f5f5f5, #ddd);
+      border-bottom: 1px solid #ccc;
+      padding: 9px;
+      font-weight: bold;
+    }
+
+    .sidebar-content {
+      padding: 10px;
+    }
+
+    .sidebar-content a {
+      display: block;
+      color: #034b8a;
+      text-decoration: none;
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .sidebar-content a:last-child {
+      border-bottom: 0;
+    }
+
+    .sidebar-content a:hover {
+      text-decoration: underline;
+    }
+
+    .sidebar-content a.active {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .welcome {
+      line-height: 1.5;
+      color: #555;
+    }
+
+    .empty {
+      color: #777;
+      padding: 15px 0;
+    }
+
+    @media(max-width: 750px) {
+      .community-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .search input {
+        width: 140px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="header">
+  <a href="index.html">
+    <img
+      class="logo"
+      src="https://upload.wikimedia.org/wikipedia/commons/0/05/Logo_of_YouTube_%282006-2011%29.svg"
+      alt="YouTube">
+  </a>
+
+  <form class="search" action="videos.html">
+    <input name="q" placeholder="Search videos...">
+    <button type="submit">Search</button>
+  </form>
+</header>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html">Home</a>
+    <a href="videos.html">Videos</a>
+    <a href="channels.html">Channels</a>
+    <a href="categories.html">Categories</a>
+    <a href="community.html">Community</a>
+  </div>
+</nav>
+
+<main class="container">
+
+  <h1 class="page-title">Community</h1>
+
+  <div class="community-layout">
+
+    <section>
+
+      <h2 class="section-title">Recent Discussions</h2>
+
+      <div class="post-box">
+        <form id="postForm">
+
+          <textarea
+            id="postText"
+            maxlength="1000"
+            placeholder="Share something with the community..."
+            required></textarea>
+
+          <div class="post-actions">
+            <span id="characterCount">0 / 1000</span>
+            <button type="submit" id="submitPost">Post</button>
+          </div>
+
+        </form>
+      </div>
+
+      <div id="posts">
+        <div class="empty">Loading discussions...</div>
+      </div>
+
+    </section>
+
+    <aside>
+
+      <div class="sidebar-box">
+        <div class="sidebar-title">About Community</div>
+
+        <div class="sidebar-content">
+          <p class="welcome">
+            Welcome to the YouTube community!
+            Share your thoughts, discuss videos
+            and meet other members.
+          </p>
+        </div>
+      </div>
+
+      <div class="sidebar-box">
+        <div class="sidebar-title">Topics</div>
+
+        <div class="sidebar-content">
+          <a href="#" data-topic="All" class="active">All Discussions</a>
+          <a href="#" data-topic="Music">Music</a>
+          <a href="#" data-topic="Gaming">Gaming</a>
+          <a href="#" data-topic="Entertainment">Entertainment</a>
+          <a href="#" data-topic="Technology">Technology</a>
+          <a href="#" data-topic="Other">Other</a>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+</main>
+
+<script>
+const API = "/api";
+
+const postsContainer = document.getElementById("posts");
+const postForm = document.getElementById("postForm");
+const postText = document.getElementById("postText");
+const characterCount = document.getElementById("characterCount");
+const submitPost = document.getElementById("submitPost");
+
+let currentTopic = "All";
+
+
+// CHARACTER COUNTER
+postText.addEventListener("input", () => {
+  characterCount.textContent =
+    `${postText.value.length} / 1000`;
+});
+
+
+// DATE FORMAT
+function formatDate(date) {
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return "Recently";
+  }
+
+  return parsed.toLocaleString();
+}
+
+
+// LOAD POSTS
+async function loadPosts() {
+  postsContainer.replaceChildren();
+
+  const loading = document.createElement("div");
+  loading.className = "empty";
+  loading.textContent = "Loading discussions...";
+
+  postsContainer.appendChild(loading);
+
+  try {
+    const url = currentTopic === "All"
+      ? `${API}/posts`
+      : `${API}/posts?topic=${encodeURIComponent(currentTopic)}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not load posts");
+    }
+
+    postsContainer.replaceChildren();
+
+    const posts = data.items || [];
+
+    if (!posts.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No discussions yet.";
+
+      postsContainer.appendChild(empty);
+      return;
+    }
+
+    posts.forEach(post => {
+      const article = document.createElement("article");
+      article.className = "post";
+
+      const avatar = document.createElement("img");
+      avatar.className = "post-avatar";
+      avatar.src = "https://www.gravatar.com/avatar/?d=identicon";
+      avatar.alt = "";
+
+      const content = document.createElement("div");
+      content.className = "post-content";
+
+      const author = document.createElement("span");
+      author.className = "post-author";
+      author.textContent = post.author || "Guest";
+
+      const date = document.createElement("span");
+      date.className = "post-date";
+      date.textContent = formatDate(post.created_at);
+
+      const text = document.createElement("p");
+      text.className = "post-text";
+      text.textContent = post.content || "";
+
+      const footer = document.createElement("div");
+      footer.className = "post-footer";
+      footer.textContent = post.topic || "Other";
+
+      content.append(author, date, text, footer);
+      article.append(avatar, content);
+
+      postsContainer.appendChild(article);
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    postsContainer.replaceChildren();
+
+    const message = document.createElement("div");
+    message.className = "empty";
+    message.textContent = "Could not load discussions.";
+
+    postsContainer.appendChild(message);
+  }
+}
+
+
+// CREATE POST
+postForm.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const content = postText.value.trim();
+
+  if (!content) return;
+
+  const topic = currentTopic === "All"
+    ? "Other"
+    : currentTopic;
+
+  submitPost.disabled = true;
+  submitPost.textContent = "Posting...";
+
+  try {
+    const response = await fetch(`${API}/posts`, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        content: content,
+        topic: topic
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Could not publish post");
+    }
+
+    postText.value = "";
+    characterCount.textContent = "0 / 1000";
+
+    await loadPosts();
+
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+
+  } finally {
+    submitPost.disabled = false;
+    submitPost.textContent = "Post";
+  }
+});
+
+
+// TOPIC FILTER
+document.querySelectorAll("[data-topic]").forEach(link => {
+  link.addEventListener("click", event => {
+    event.preventDefault();
+
+    currentTopic = link.dataset.topic;
+
+    document.querySelectorAll("[data-topic]").forEach(item => {
+      item.classList.toggle(
+        "active",
+        item.dataset.topic === currentTopic
+      );
+    });
+
+    loadPosts();
+  });
+});
+
+
+// INITIAL LOAD
+loadPosts();
+</script>
+
+</body>
+</html>

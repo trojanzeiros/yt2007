@@ -1,0 +1,652 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" href="assets/favicon.ico?v=2" type="image/x-icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>YouTube - Watch</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: white;
+    color: #333;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 13px;
+}
+
+.header {
+    width: 960px;
+    max-width: 96%;
+    height: 75px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    width: 130px;
+}
+
+.search {
+    display: flex;
+    gap: 5px;
+}
+
+.search input {
+    width: 300px;
+    height: 27px;
+    border: 1px solid #999;
+    padding: 4px;
+}
+
+.search button {
+    border: 1px solid #999;
+    background: linear-gradient(#fff, #ddd);
+    padding: 4px 14px;
+}
+
+.nav {
+    background: linear-gradient(#f5f5f5, #ddd);
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #bbb;
+}
+
+.nav-inner {
+    width: 960px;
+    max-width: 96%;
+    margin: auto;
+    padding: 10px 0;
+    display: flex;
+    gap: 25px;
+}
+
+.nav a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.container {
+    width: 960px;
+    max-width: 96%;
+    margin: 25px auto;
+}
+
+#videoTitle {
+    font-size: 20px;
+    font-weight: normal;
+    margin: 0 0 15px;
+}
+
+.player-container {
+    width: 100%;
+    background: #000;
+}
+
+.video-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+}
+
+#yt-player {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#yt-player iframe {
+    width: 100%;
+    height: 100%;
+}
+
+/* PLAYER CONTROLS - MATCHING REFERENCE IMAGE */
+
+.controls {
+    height: 36px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    background: linear-gradient(
+        to bottom,
+        #f5f5f5 0%,
+        #dedede 35%,
+        #c8c8c8 100%
+    );
+
+    border: 1px solid #aaa;
+    box-shadow:
+        inset 0 1px 1px #fff,
+        inset 0 -1px 1px #aaa;
+}
+
+.play-button {
+    flex: 0 0 42px;
+    height: 34px;
+    position: relative;
+    border: 0;
+    border-right: 1px solid #c3c3c3;
+    background: linear-gradient(#f8f8f8, #d4d4d4);
+    cursor: pointer;
+    padding: 0;
+}
+
+.play-button:hover {
+    background: linear-gradient(#fff, #ccc);
+}
+
+.play-icon {
+    display: block;
+    width: 0;
+    height: 0;
+    margin: auto;
+
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 17px solid #555;
+
+    filter: drop-shadow(1px 1px 1px #999);
+}
+
+.play-button.paused .play-icon {
+    width: 15px;
+    height: 19px;
+    border: 0;
+    position: relative;
+}
+
+.play-button.paused .play-icon::before,
+.play-button.paused .play-icon::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 5px;
+    height: 19px;
+    background: #555;
+    box-shadow: 1px 1px 1px #999;
+}
+
+.play-button.paused .play-icon::before {
+    left: 0;
+}
+
+.play-button.paused .play-icon::after {
+    right: 0;
+}
+
+.timeline-area {
+    height: 34px;
+    flex: 1;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    padding: 0 9px 0 14px;
+}
+
+.timeline {
+    position: relative;
+    width: 100%;
+    height: 9px;
+    cursor: pointer;
+
+    background: linear-gradient(
+        to bottom,
+        #aaa,
+        #ddd 45%,
+        #aaa
+    );
+
+    border: 1px solid #b5b5b5;
+    box-shadow:
+        inset 0 1px 2px #999,
+        0 1px 1px #fff;
+}
+
+.progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+
+    background: linear-gradient(
+        to bottom,
+        #ff5555,
+        #d90000
+    );
+}
+
+.knob {
+    position: absolute;
+    top: 50%;
+    left: 0%;
+    transform: translate(-50%, -50%);
+
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle at 35% 30%,
+        #f4f4f4 0%,
+        #aaa 27%,
+        #555 48%,
+        #222 58%,
+        #888 72%,
+        #ddd 82%,
+        #777 100%
+    );
+
+    border: 2px solid #888;
+
+    box-shadow:
+        0 1px 2px #555,
+        inset 0 1px 1px #fff;
+}
+
+.time {
+    flex: 0 0 45px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+
+    color: #444;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    text-shadow: 0 1px 1px white;
+}
+
+.video-details {
+    margin-top: 18px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 15px;
+}
+
+#videoDescription {
+    color: #555;
+    line-height: 1.5;
+}
+
+#videoChannel {
+    color: #0033cc;
+    text-decoration: none;
+}
+
+#videoViews {
+    color: #777;
+    margin-top: 8px;
+}
+
+.related {
+    margin-top: 25px;
+}
+
+.related h2 {
+    font-size: 17px;
+    font-weight: normal;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+}
+
+#relatedVideos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+.related-item img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: #eee;
+}
+
+.related-item a {
+    display: block;
+    color: #0033cc;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+@media(max-width: 600px) {
+    .search input {
+        width: 140px;
+    }
+
+    #relatedVideos {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+    <a href="index.html">
+        <img class="logo"
+        src="https://upload.wikimedia.org/wikipedia/commons/0/05/Logo_of_YouTube_%282006-2011%29.svg"
+        alt="YouTube">
+    </a>
+
+    <form class="search" action="videos.html">
+        <input name="q" placeholder="Search videos...">
+        <button type="submit">Search</button>
+    </form>
+</header>
+
+<nav class="nav">
+    <div class="nav-inner">
+        <a href="index.html">Home</a>
+        <a href="videos.html">Videos</a>
+        <a href="channels.html">Channels</a>
+        <a href="categories.html">Categories</a>
+        <a href="community.html">Community</a>
+    </div>
+</nav>
+
+<main class="container">
+
+    <h1 id="videoTitle">Loading video...</h1>
+
+    <div class="player-container">
+
+        <div class="video-screen">
+            <div id="yt-player"></div>
+        </div>
+
+        <div class="controls">
+
+            <button class="play-button" id="playButton"
+                    aria-label="Play">
+                <span class="play-icon"></span>
+            </button>
+
+            <div class="timeline-area">
+                <div class="timeline" id="timeline">
+                    <div class="progress" id="progress"></div>
+                    <div class="knob" id="knob"></div>
+                </div>
+            </div>
+
+            <div class="time" id="timeDisplay">0:00</div>
+
+        </div>
+    </div>
+
+    <section class="video-details">
+        <a id="videoChannel" href="#">Channel</a>
+        <div id="videoViews"></div>
+        <p id="videoDescription"></p>
+    </section>
+
+    <section class="related">
+        <h2>Related Videos</h2>
+        <div id="relatedVideos"></div>
+    </section>
+
+</main>
+
+<script>
+const API = "/api";
+
+const videoId = new URLSearchParams(location.search).get("v");
+
+let player = null;
+let duration = 0;
+let dragging = false;
+let updateTimer = null;
+
+const playButton = document.getElementById("playButton");
+const timeline = document.getElementById("timeline");
+const progress = document.getElementById("progress");
+const knob = document.getElementById("knob");
+const timeDisplay = document.getElementById("timeDisplay");
+
+function formatTime(seconds) {
+    if (!Number.isFinite(seconds)) return "0:00";
+
+    seconds = Math.floor(seconds);
+
+    const minutes = Math.floor(seconds / 60);
+    const remaining = seconds % 60;
+
+    return `${minutes}:${String(remaining).padStart(2, "0")}`;
+}
+
+function setPlaying(playing) {
+    playButton.classList.toggle("paused", playing);
+    playButton.setAttribute(
+        "aria-label",
+        playing ? "Pause" : "Play"
+    );
+}
+
+function updateControls() {
+    if (!player || dragging) return;
+
+    try {
+        const current = player.getCurrentTime() || 0;
+        duration = player.getDuration() || 0;
+
+        const percentage = duration > 0
+            ? Math.min(100, (current / duration) * 100)
+            : 0;
+
+        progress.style.width = percentage + "%";
+        knob.style.left = percentage + "%";
+
+        timeDisplay.textContent =
+            `${formatTime(current)}/${formatTime(duration)}`;
+
+        setPlaying(player.getPlayerState() === 1);
+    } catch (error) {
+        console.warn(error);
+    }
+}
+
+playButton.addEventListener("click", () => {
+    if (!player) return;
+
+    const state = player.getPlayerState();
+
+    if (state === 1) {
+        player.pauseVideo();
+    } else {
+        player.playVideo();
+    }
+});
+
+function seek(event) {
+    if (!player || !duration) return;
+
+    const rect = timeline.getBoundingClientRect();
+
+    const percentage = Math.max(
+        0,
+        Math.min(1, (event.clientX - rect.left) / rect.width)
+    );
+
+    const seconds = percentage * duration;
+
+    player.seekTo(seconds, true);
+
+    progress.style.width = (percentage * 100) + "%";
+    knob.style.left = (percentage * 100) + "%";
+}
+
+timeline.addEventListener("pointerdown", event => {
+    dragging = true;
+    timeline.setPointerCapture(event.pointerId);
+    seek(event);
+});
+
+timeline.addEventListener("pointermove", event => {
+    if (dragging) seek(event);
+});
+
+timeline.addEventListener("pointerup", event => {
+    if (dragging) {
+        seek(event);
+        dragging = false;
+    }
+});
+
+timeline.addEventListener("pointercancel", () => {
+    dragging = false;
+});
+
+async function loadVideoDetails() {
+    if (!videoId) {
+        document.getElementById("videoTitle").textContent =
+            "Video ID missing";
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API}/video/${encodeURIComponent(videoId)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Video not found");
+        }
+
+        const video = data.items?.[0];
+
+        if (!video) throw new Error("Video not found");
+
+        const snippet = video.snippet;
+        const stats = video.statistics || {};
+
+        document.title = `YouTube - ${snippet.title}`;
+
+        document.getElementById("videoTitle").textContent =
+            snippet.title;
+
+        document.getElementById("videoDescription").textContent =
+            snippet.description || "";
+
+        document.getElementById("videoViews").textContent =
+            `${Number(stats.viewCount || 0).toLocaleString()} views`;
+
+        const channel = document.getElementById("videoChannel");
+
+        channel.textContent = snippet.channelTitle || "Channel";
+        channel.href = snippet.channelId
+            ? `channel.html?id=${encodeURIComponent(snippet.channelId)}`
+            : "#";
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById("videoTitle").textContent =
+            "Could not load video information";
+    }
+}
+
+async function loadRelated() {
+    if (!videoId) return;
+
+    try {
+        const response = await fetch(
+            `${API}/related/${encodeURIComponent(videoId)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error("Related videos unavailable");
+
+        const container = document.getElementById("relatedVideos");
+        container.replaceChildren();
+
+        (data.items || []).forEach(video => {
+            const id = video.id?.videoId;
+            const snippet = video.snippet;
+
+            if (!id || !snippet) return;
+
+            const card = document.createElement("div");
+            card.className = "related-item";
+
+            const image = document.createElement("img");
+            image.src = snippet.thumbnails?.medium?.url || "";
+            image.alt = "";
+
+            const link = document.createElement("a");
+            link.href = `watch.html?v=${encodeURIComponent(id)}`;
+            link.textContent = snippet.title || "Untitled";
+
+            card.append(image, link);
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function onYouTubeIframeAPIReady() {
+    if (!videoId) return;
+
+    player = new YT.Player("yt-player", {
+        videoId: videoId,
+
+        playerVars: {
+            autoplay: 0,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            rel: 0
+        },
+
+        events: {
+            onReady: () => {
+                duration = player.getDuration() || 0;
+                updateControls();
+
+                clearInterval(updateTimer);
+                updateTimer = setInterval(updateControls, 250);
+            },
+
+            onStateChange: event => {
+                setPlaying(event.data === YT.PlayerState.PLAYING);
+
+                if (event.data === YT.PlayerState.ENDED) {
+                    progress.style.width = "100%";
+                    knob.style.left = "100%";
+                }
+            }
+        }
+    });
+}
+
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+const apiScript = document.createElement("script");
+apiScript.src = "https://www.youtube.com/iframe_api";
+document.head.appendChild(apiScript);
+
+loadVideoDetails();
+loadRelated();
+</script>
+
+</body>
+</html>
